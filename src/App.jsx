@@ -45,17 +45,26 @@ function App() {
   const [fromCurrency, setFromCurrency] = useState("EUR");
   const [toCurrency, setToCurrency] = useState("USD");
   const [amount, setAmount] = useState(1);
+  const [convertedAmount, setConvertedAmount] = useState(null);
 
   useEffect(() => {
     async function getCurrencies() {
       const res = await fetch(`${API_URL}/latest`);
       const data = await res.json();
-      console.log(data);
       setCurrencies(Object.keys(data.rates));
     }
     getCurrencies();
   }, []);
-  console.log(currencies);
+
+  async function handleConvert() {
+    const res = await fetch(
+      `${API_URL}/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`
+    );
+    const data = await res.json();
+    console.log(data);
+    setConvertedAmount(data.rates[toCurrency]);
+  }
+
   return (
     <div className="app">
       <h1>Currency Exchange Calculator</h1>
@@ -73,6 +82,7 @@ function App() {
           />
 
           <select
+            value={fromCurrency}
             onChange={(e) => setFromCurrency(e.target.value)}
             className="dropdown"
           >
@@ -86,6 +96,7 @@ function App() {
           <span className="arrow">→</span>
 
           <select
+            value={toCurrency}
             onChange={(e) => setToCurrency(e.target.value)}
             className="dropdown"
           >
@@ -96,10 +107,12 @@ function App() {
             ))}
           </select>
         </div>
-        <button className="convert-button">Convert</button>
+        <button className="convert-button" onClick={handleConvert}>
+          Convert
+        </button>
         <p className="loading">Converting...</p>
 
-        <p className="result"></p>
+        <p className="result">{convertedAmount}</p>
       </div>
     </div>
   );
